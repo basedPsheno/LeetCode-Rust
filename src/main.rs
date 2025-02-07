@@ -3,22 +3,29 @@ use std::collections::HashMap;
 struct Solution;
 
 impl Solution {
-    pub fn tuple_same_product(nums: Vec<i32>) -> i32 {
-        let mut counter = HashMap::new();
-        let mut ans = 0;
+    pub fn query_results(limit: i32, queries: Vec<Vec<i32>>) -> Vec<i32> {
+        let mut ball_color = HashMap::new();
+        let mut color_count = HashMap::new();
+        let mut ans = Vec::with_capacity(queries.len());
 
-        for i in 0..nums.len() {
-            for j in (i+1)..nums.len() {
-                counter.entry(nums[i] * nums[j])
-                    .and_modify(|v| *v += 1)
-                    .or_insert(1);
-            }
-        }
+        for i in queries {
+            let x = i[0];
+            let y = i[1];
 
-        for (_, &val) in counter.iter() {
-            if val > 1 {
-                ans += 4 * val * (val - 1);
+            if let Some(&old_color) = ball_color.get(&x) {
+                if let Some(count) = color_count.get_mut(&old_color) {
+                    *count -= 1;
+                    if *count == 0 {
+                        color_count.remove(&old_color);
+                    }
+                }
             }
+
+            ball_color.insert(x, y);
+
+            *color_count.entry(y).or_insert(0) += 1;
+
+            ans.push(color_count.len() as i32);
         }
 
         ans
@@ -31,18 +38,13 @@ mod tests{
     use super::*;
 
     #[test]
-    fn tuple_same_product_example_1() {
-        assert_eq!(Solution::tuple_same_product(vec![2,3,4,6]), 8);
+    fn query_results_example_1() {
+        assert_eq!(Solution::query_results(4, vec![vec![1,4], vec![2,5], vec![1,3], vec![3,4]]), vec![1,2,2,3]);
     }
 
     #[test]
-    fn tuple_same_product_example_2() {
-        assert_eq!(Solution::tuple_same_product(vec![1,2,4,5,10]), 16);
-    }
-
-    #[test]
-    fn tuple_same_product_example_3() {
-        assert_eq!(Solution::tuple_same_product(vec![2,3,4,6,8,12]), 40);
+    fn query_results_example_2() {
+        assert_eq!(Solution::query_results(4, vec![vec![0,1], vec![1,2], vec![2,2], vec![3,4], vec![4,5]]), vec![1,2,2,3,4]);
     }
 }
 
