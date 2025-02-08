@@ -1,34 +1,42 @@
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
-struct Solution;
+struct NumberContainers {
+    container: HashMap<i32, i32>,
+    ind_memo: HashMap<i32, BTreeSet<i32>>,
+}
 
-impl Solution {
-    pub fn query_results(limit: i32, queries: Vec<Vec<i32>>) -> Vec<i32> {
-        let mut ball_color = HashMap::new();
-        let mut color_count = HashMap::new();
-        let mut ans = Vec::with_capacity(queries.len());
 
-        for i in queries {
-            let x = i[0];
-            let y = i[1];
+/** 
+ * `&self` means the method takes an immutable reference.
+ * If you need a mutable reference, change it to `&mut self` instead.
+ */
+impl NumberContainers {
 
-            if let Some(&old_color) = ball_color.get(&x) {
-                if let Some(count) = color_count.get_mut(&old_color) {
-                    *count -= 1;
-                    if *count == 0 {
-                        color_count.remove(&old_color);
-                    }
+    fn new() -> Self {
+        Self {
+            container: HashMap::new(),
+            ind_memo: HashMap::new(),
+        }
+    }
+    
+    fn change(&mut self, index: i32, number: i32) {
+        if let Some(&old_number) = self.container.get(&index) {
+            if let Some(indicies) = self.ind_memo.get_mut(&old_number) {
+                indicies.remove(&index);
+                if indicies.is_empty() {
+                    self.ind_memo.remove(&old_number);
                 }
             }
-
-            ball_color.insert(x, y);
-
-            *color_count.entry(y).or_insert(0) += 1;
-
-            ans.push(color_count.len() as i32);
         }
 
-        ans
+        self.container.insert(index, number);
+        self.ind_memo.entry(number).or_insert_with(BTreeSet::new).insert(index);
+    }
+    
+    fn find(&self, number: i32) -> i32 {
+        self.ind_memo.get(&number)
+            .and_then(|indices| indices.iter().next().cloned())
+            .unwrap_or(-1)
     }
 }
 
@@ -37,15 +45,7 @@ impl Solution {
 mod tests{
     use super::*;
 
-    #[test]
-    fn query_results_example_1() {
-        assert_eq!(Solution::query_results(4, vec![vec![1,4], vec![2,5], vec![1,3], vec![3,4]]), vec![1,2,2,3]);
-    }
-
-    #[test]
-    fn query_results_example_2() {
-        assert_eq!(Solution::query_results(4, vec![vec![0,1], vec![1,2], vec![2,2], vec![3,4], vec![4,5]]), vec![1,2,2,3,4]);
-    }
+    // честно лень было писать тесты для такой задачи
 }
 
 fn main() {}
