@@ -1,42 +1,22 @@
-use std::collections::{BTreeSet, HashMap};
+use std::collections::HashMap;
 
-struct NumberContainers {
-    container: HashMap<i32, i32>,
-    ind_memo: HashMap<i32, BTreeSet<i32>>,
-}
+struct Solution;
 
+impl Solution {
+    pub fn count_bad_pairs(nums: Vec<i32>) -> i64 {
+        let n = nums.len();
+        let mut bad_pairs = 0;
+        let mut map = HashMap::new();
 
-/** 
- * `&self` means the method takes an immutable reference.
- * If you need a mutable reference, change it to `&mut self` instead.
- */
-impl NumberContainers {
-
-    fn new() -> Self {
-        Self {
-            container: HashMap::new(),
-            ind_memo: HashMap::new(),
-        }
-    }
-    
-    fn change(&mut self, index: i32, number: i32) {
-        if let Some(&old_number) = self.container.get(&index) {
-            if let Some(indicies) = self.ind_memo.get_mut(&old_number) {
-                indicies.remove(&index);
-                if indicies.is_empty() {
-                    self.ind_memo.remove(&old_number);
-                }
+        for i in 0..n {
+            bad_pairs += i as i64;
+            if let Some(&count) = map.get(&(nums[i] - i as i32)) {
+                bad_pairs -= count;
             }
+            *map.entry(nums[i] - i as i32).or_insert(0) += 1;
         }
 
-        self.container.insert(index, number);
-        self.ind_memo.entry(number).or_insert_with(BTreeSet::new).insert(index);
-    }
-    
-    fn find(&self, number: i32) -> i32 {
-        self.ind_memo.get(&number)
-            .and_then(|indices| indices.iter().next().cloned())
-            .unwrap_or(-1)
+        bad_pairs
     }
 }
 
@@ -45,7 +25,15 @@ impl NumberContainers {
 mod tests{
     use super::*;
 
-    // честно лень было писать тесты для такой задачи
+    #[test]
+    fn count_bad_pairs_example_1() {
+        assert_eq!(Solution::count_bad_pairs(vec![4,1,3,3]), 5);
+    }
+
+    #[test]
+    fn count_bad_pairs_example_2() {
+        assert_eq!(Solution::count_bad_pairs(vec![1,2,3,4,5]), 0);
+    }
 }
 
 fn main() {}
