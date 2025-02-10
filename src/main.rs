@@ -1,22 +1,33 @@
-use std::collections::HashMap;
-
 struct Solution;
 
 impl Solution {
-    pub fn count_bad_pairs(nums: Vec<i32>) -> i64 {
-        let n = nums.len();
-        let mut bad_pairs = 0;
-        let mut map = HashMap::new();
+    pub fn clear_digits(s: String) -> String {
+        let mut char_pointer = Vec::new();
+        let n = s.len();
+        let mut check = vec![true; n];
+        let mut ans = Vec::new();
 
-        for i in 0..n {
-            bad_pairs += i as i64;
-            if let Some(&count) = map.get(&(nums[i] - i as i32)) {
-                bad_pairs -= count;
+        for (i, c) in s.chars().enumerate() {
+            if c.is_ascii_digit() {
+                if let Some(ch) = char_pointer.pop() {
+                    check[ch] = false;
+                }
+                check[i] = false;
             }
-            *map.entry(nums[i] - i as i32).or_insert(0) += 1;
+
+            if c.is_ascii_alphabetic() {
+                char_pointer.push(i);
+            }
+
         }
 
-        bad_pairs
+        for (i, c) in s.chars().enumerate() {
+            if check[i] {
+                ans.push(c);
+            }
+        }
+
+        ans.into_iter().collect::<String>()
     }
 }
 
@@ -26,13 +37,13 @@ mod tests{
     use super::*;
 
     #[test]
-    fn count_bad_pairs_example_1() {
-        assert_eq!(Solution::count_bad_pairs(vec![4,1,3,3]), 5);
+    fn clear_digits_example_1() {
+        assert_eq!(Solution::clear_digits("abc".to_string()), "abc".to_string());
     }
 
     #[test]
-    fn count_bad_pairs_example_2() {
-        assert_eq!(Solution::count_bad_pairs(vec![1,2,3,4,5]), 0);
+    fn clear_digits_example_2() {
+        assert_eq!(Solution::clear_digits("cb34".to_string()), "".to_string());
     }
 }
 
