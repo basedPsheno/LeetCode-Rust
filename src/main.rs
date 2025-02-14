@@ -1,56 +1,49 @@
-use std::collections::BTreeMap;
+use std::collections::HashSet;
 
-struct Solution;
+struct ProductOfNumbers {
+    prefix: Vec<i32>,
+}
 
-impl Solution {
-    pub fn min_operations(nums: Vec<i32>, k: i32) -> i32 {
-        let mut btree = BTreeMap::new();
-        let mut ans = 0;
 
-        for num in nums {
-            *btree.entry(num as i64).or_insert(0) += 1;
+/** 
+ * `&self` means the method takes an immutable reference.
+ * If you need a mutable reference, change it to `&mut self` instead.
+ */
+impl ProductOfNumbers {
+    fn new() -> Self {
+        Self { prefix: vec![1] }
+    }
+
+    fn add(&mut self, num: i32) {
+        if num == 0 {
+            self.prefix = vec![1];
+        } else {
+            let last = *self.prefix.last().unwrap();
+            self.prefix.push(last * num);
         }
+    }
 
-        println!("{:?}", btree);
-
-        while *btree.first_key_value().unwrap().0 < k as i64 {
-            println!("{:?}", btree);
-            let (mut min, mut max) = (-1, -1);
-            if let Some((x, count)) = btree.pop_first() {
-                if count > 1 {
-                    btree.insert(x, count - 1);
-                }
-                min = x;
-            }
-            if let Some((y, count)) = btree.pop_first() {
-                if count > 1 {
-                    btree.insert(y, count - 1);
-                }
-                max = y;
-            }
-
-            btree.entry(min * 2 + max).and_modify(|v| *v += 1).or_insert(1);
-
-            ans += 1;
+    fn get_product(&self, k: i32) -> i32 {
+        let k = k as usize;
+        let n = self.prefix.len();
+        if k >= n {
+            return 0;
         }
-
-        ans
+        self.prefix[n - 1] / self.prefix[n - 1 - k]
     }
 }
+
+/**
+ * Your ProductOfNumbers object will be instantiated and called as such:
+ * let obj = ProductOfNumbers::new();
+ * obj.add(num);
+ * let ret_2: i32 = obj.get_product(k);
+ */
 
 #[cfg(test)]
 mod tests{
     use super::*;
 
-    #[test]
-    fn min_operations_example_1() {
-        assert_eq!(Solution::min_operations(vec![2,11,10,1,3], 10), 2);
-    }
-
-    #[test]
-    fn min_operations_example_2() {
-        assert_eq!(Solution::min_operations(vec![1,1,2,4,9], 20), 4);
-    }
 }
 
 fn main() {}
